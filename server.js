@@ -15,12 +15,28 @@ const data_file = path.join(__dirname, 'data', 'resources.json');
 
 
 app.get('/', (req, res) => {
-
-
-  res.send('Hallo ich bin Start Seite')
-
-
+res.send('Hallo ich bin Start Seite')
 });
+
+app.get('/resources/:id' , (req, res) => {
+ try {
+  const data = readFileSync(data_file, 'utf8');
+  const resources = JSON.parse(data);
+
+  const resourceId = req.params.id ;
+  const resource = resources.find(r=> r.id === resourceId);
+  if (resource)
+  {
+    res.json(resource);
+  } else {
+    res.status(404).json({error:`Resources mit ID ${resourceId} nicht gefunden`})
+  }
+
+ }catch(error){
+
+
+ }
+})
 
 app.get('/resources', (req, res) => {
 try {
