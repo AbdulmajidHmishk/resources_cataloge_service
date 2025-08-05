@@ -29,7 +29,7 @@ app.get('/resources/:id' , (req, res) => {
   {
     res.json(resource);
   } else {
-    res.status(404).json({error:`Resources mit ID ${resourceId} nicht gefunden`})
+    res.status(404).json({error:` Hi Resources mit ID ${resourceId} nicht gefunden`})
   }
 
  }catch(error){
