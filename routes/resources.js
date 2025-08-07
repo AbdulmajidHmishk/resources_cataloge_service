@@ -12,18 +12,25 @@ const __dirname = path.dirname(__filename);
 const data_file = path.join(__dirname, '../data', 'resources.json');
 
 
-router.get('/', (req, res) => {
+router.get('/', (req, res, next) => {
     try {
         const data = readFileSync(data_file, 'utf8');
-        const resources = JSON.parse(data);
+        let resources = JSON.parse(data);
+
+        // this is for adding the filter
+        const {type , authorId} = req.query;
+       if (type) {resources = resources.filter(r => r.type === type);}
+
+        if(authorId)  {resources = resources.filter(r => r.authorId===authorId);}
+
         res.json(resources);
     } catch (error) {
-        res.status(500).json({ error: 'Interner Serverfehler beim Laden der Ressourcen-Daten.' });
+        next(error);
     }
 });
 
 
-router.get('/:id', (req, res) => {
+router.get('/:id', (req, res, next) => {
     try {
         const resourceId = req.params.id;
         const data = readFileSync(data_file, 'utf8');
@@ -37,12 +44,12 @@ router.get('/:id', (req, res) => {
         }
 
     } catch (error) {
-        res.status(500).json({ error: 'Interner Serverfehler beim Laden der Ressourcen-Daten.' });
+        next(error);
     }
 });
 
 
-router.post('/', (req, res) => {
+router.post('/', (req, res, next) => {
     const newData = req.body;
 
     if (!newData.title || !newData.type) {
@@ -68,18 +75,18 @@ router.post('/', (req, res) => {
         // 5. Antwort schicken.
         res.status(201).json(newResource);
     } catch (error) {
-        res.status(500).json({ error: 'Interner Serverfehler bei der Verarbeitung der Ressourcen-Daten.' });
+        next(error);
     }
 
 });
 
 
-router.put('/:id', (req, res) => {
+router.put('/:id', (req, res, next) => {
     // 1. ID auslesen
     const resourceId = req.params.id;
     const newData = req.body; 
     
-    if (Object.keys(newData).lenght === 0) {
+    if (!newData || Object.keys(newData).length === 0) {
         res.status(400).json({ error: 'Keine Daten zum Aktualisieren vorhanden.' });
         return;
     }
@@ -108,9 +115,8 @@ router.put('/:id', (req, res) => {
         res.status(200).json(resources[resourceIndex]);
 
     } catch(error) {
-        res.status(500).json({ error: 'Interner Serverfehler bei der Verarbeitung der Ressourcen-Daten.' });
+        next(error);
     }
-    
 });
 
 
